@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>肉丸屎速通排行榜</title>
+  <style>
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; padding: 20px; }
+    table { border-collapse: collapse; margin-bottom: 30px; width: 100%; max-width: 1200px; }
+    th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: center; font-size: 14px; }
+    th { background: #eee; }
+    h1, h2 { margin-top: 20px; margin-bottom: 10px; }
+    .timecell { font-family: "Consolas", "Menlo", monospace; }
+  </style>
+</head>
+<body>
+
+  <h1>肉丸屎速通排行榜</h1>
+  <p>資料來源：Unity 遊戲上傳的 JSON 成績</p>
+
+  <h2>總榜（全部通關紀錄）</h2>
+  <table id="table-all">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>玩家</th>
+        <th>通關時間</th>
+        <th>隱藏全解？</th>
+        <th>遊玩時間</th>
+        <th>任務時間戳</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>全隱藏任務榜（兩個隱藏都解完才列入）</h2>
+  <table id="table-hidden">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>玩家</th>
+        <th>通關時間</th>
+        <th>遊玩時間</th>
+        <th>任務時間戳</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    // TODO：部署後改成你的後端 URL，例如：
+    // const API_URL = "https://rouwan-api.onrender.com/api/leaderboard";
+    const API_URL = "http://localhost:5000/api/leaderboard";
+	
+	const missionNames = [
+	  "隱藏1：開賽前 就棒賽",               // 0
+	  "任務1：進入臥室衣櫃",                 // 1
+	  "任務2：衝撞站在一樓牆角的 Leasing Agent", // 2
+	  "任務3：跳上廚房中島",                 // 3
+	  "任務4：跳上瓦斯爐",                   // 4
+	  "任務5：登上二樓！",                   // 5
+	  "任務6：把狗鼻伸出二樓牆角奇怪的破洞!!", // 6
+	  "任務7：從二樓 Loft 直接跳下一樓!!!",   // 7
+	  "任務8：在浴缸裡洗個澡～",             // 8
+	  "任務9：在二樓拉屎氣死把拔馬麻...",     // 9
+	  "隱藏2：從二樓拉屎到樓下！"            // 10
+	];
+
+    function formatTime(sec) {
+      if (sec < 0) return "--:--.--";
+      const minutes = Math.floor(sec / 60);
+      const seconds = (sec % 60).toFixed(2);
+      const minStr = minutes.toString().padStart(2, '0');
+      const secStr = seconds.toString().padStart(5, '0');
+      return `${minStr}:${secStr}`;
+    }
+
+    function renderTableAll(data) {
+      const tbody = document.querySelector("#table-all tbody");
+      tbody.innerHTML = "";
+
+      data.forEach((entry, index) => {
+        const tr = document.createElement("tr");
+
+        const tdRank = document.createElement("td");
+        tdRank.textContent = index + 1;
+        tr.appendChild(tdRank);
+
+        const tdPlayer = document.createElement("td");
+        tdPlayer.textContent = entry.playerName;
+        tr.appendChild(tdPlayer);
+
+        const tdTotal = document.createElement("td");
+        tdTotal.textContent = formatTime(entry.totalTime);
+        tdTotal.className = "timecell";
+        tr.appendChild(tdTotal);
+
+        const tdHidden = document.createElement("td");
+        tdHidden.textContent = entry.allHiddenCleared ? "✔" : "✘";
+        tr.appendChild(tdHidden);
+
+        const tdRunId = document.createElement("td");
+        tdRunId.textContent = entry.runId || "";
+        tr.appendChild(tdRunId);
+
+        const tdMissions = document.createElement("td");
+		tdMissions.className = "timecell";
+
+		const times = entry.missionTimes || [];
+		const lines = times.map((t, idx) => {
+		  const name = missionNames[idx] || `任務${idx}`;
+		  return `${name}：${formatTime(t)}`;
+		});
+
+		// 每個任務一行
+		tdMissions.innerHTML = lines.join("<br>");
+		tr.appendChild(tdMissions);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderTableHidden(data) {
+      const tbody = document.querySelector("#table-hidden tbody");
+      tbody.innerHTML = "";
+
+      const filtered = data.filter(e => e.allHiddenCleared);
+      filtered.forEach((entry, index) => {
+        const tr = document.createElement("tr");
+
+        const tdRank = document.createElement("td");
+        tdRank.textContent = index + 1;
+        tr.appendChild(tdRank);
+
+        const tdPlayer = document.createElement("td");
+        tdPlayer.textContent = entry.playerName;
+        tr.appendChild(tdPlayer);
+
+        const tdTotal = document.createElement("td");
+        tdTotal.textContent = formatTime(entry.totalTime);
+        tdTotal.className = "timecell";
+        tr.appendChild(tdTotal);
+
+        const tdRunId = document.createElement("td");
+        tdRunId.textContent = entry.runId || "";
+        tr.appendChild(tdRunId);
+
+        const tdMissions = document.createElement("td");
+		tdMissions.className = "timecell";
+
+		const times = entry.missionTimes || [];
+		const lines = times.map((t, idx) => {
+		  const name = missionNames[idx] || `任務${idx}`;
+		  return `${name}：${formatTime(t)}`;
+		});
+
+		// 每個任務一行
+		tdMissions.innerHTML = lines.join("<br>");
+		tr.appendChild(tdMissions);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function loadLeaderboard() {
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        renderTableAll(data);
+        renderTableHidden(data);
+      } catch (err) {
+        console.error("載入排行榜失敗", err);
+      }
+    }
+
+    loadLeaderboard();
+    // 如果想自動刷新可以加：
+    // setInterval(loadLeaderboard, 10000);
+  </script>
+</body>
+</html>
