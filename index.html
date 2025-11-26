@@ -47,9 +47,7 @@
   </table>
 
   <script>
-    // TODO：部署後改成你的後端 URL，例如：
-    // const API_URL = "https://rouwan-api.onrender.com/api/leaderboard";
-    const API_URL = "http://localhost:5000/api/leaderboard";
+    const API_URL = "https://rowan-poorank.onrender.com/api/leaderboard";
 	
 	const missionNames = [
 	  "隱藏1：開賽前 就棒賽",               // 0
@@ -174,7 +172,7 @@
 
     loadLeaderboard();
     // 如果想自動刷新可以加：
-    // setInterval(loadLeaderboard, 10000);
+    setInterval(loadLeaderboard, 3000);
   </script>
 </body>
 </html>
