@@ -104,12 +104,17 @@
 		tdMissions.className = "timecell";
 
 		const times = entry.missionTimes || [];
-		const lines = times.map((t, idx) => {
-		  const name = missionNames[idx] || `任務${idx}`;
-		  return `${name}：${formatTime(t)}`;
+		const indicesToShow = [0, 10];  // 只顯示隱藏任務 1 & 2
+		const lines = [];
+
+		indicesToShow.forEach(i => {
+		  if (i >= 0 && i < times.length) {
+			const name = missionNames[i] || `任務${i}`;
+			const t = times[i];
+			lines.push(`${name}：${formatTime(t)}`);
+		  }
 		});
 
-		// 每個任務一行
 		tdMissions.innerHTML = lines.join("<br>");
 		tr.appendChild(tdMissions);
 
@@ -146,12 +151,17 @@
 		tdMissions.className = "timecell";
 
 		const times = entry.missionTimes || [];
-		const lines = times.map((t, idx) => {
-		  const name = missionNames[idx] || `任務${idx}`;
-		  return `${name}：${formatTime(t)}`;
+		const indicesToShow = [0, 10];  // 只顯示隱藏任務 1 & 2
+		const lines = [];
+
+		indicesToShow.forEach(i => {
+		  if (i >= 0 && i < times.length) {
+			const name = missionNames[i] || `任務${i}`;
+			const t = times[i];
+			lines.push(`${name}：${formatTime(t)}`);
+		  }
 		});
 
-		// 每個任務一行
 		tdMissions.innerHTML = lines.join("<br>");
 		tr.appendChild(tdMissions);
 
