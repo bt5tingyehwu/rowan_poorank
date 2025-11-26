@@ -7,6 +7,7 @@ app = Flask(__name__)
 CORS(app)  # 允許跨域（Unity / 網頁前端都能存取）
 
 LEADERBOARD_FILE = "leaderboard.json"
+CLEAR_TOKEN = "rowan123"  # 用來重設榜單
 
 
 def load_leaderboard():
@@ -86,6 +87,23 @@ def get_leaderboard():
     # 依 totalTime 排序，小到大
     leaderboard_sorted = sorted(leaderboard, key=lambda x: x.get("totalTime", 9999999.0))
     return jsonify(leaderboard_sorted)
+
+
+@app.route("/api/clear-leaderboard", methods=["GET"])
+def clear_leaderboard():
+    """
+    清空排行榜（全部成績刪掉）。
+    需帶上 ?token=XXX 才會成功。
+    """
+    token = request.args.get("token", "")
+
+    if token != CLEAR_TOKEN:
+        return jsonify({"error": "invalid token"}), 403
+
+    # 直接覆寫為空陣列
+    save_leaderboard([])
+
+    return jsonify({"status": "ok", "message": "leaderboard cleared"})
 
 
 if __name__ == "__main__":
